@@ -1,19 +1,18 @@
 function xdot = dynamics(x, u, P)
- 
+% rw+thr only
 % param
-J = P.J; Jw = P.Jw; Cw = P.Cw; CT = P.CT; CM = P.CM; theta = P.theta; rho = P.rho;
+J = P.J; Jw = P.Jw; Cw = P.Cw; CT = P.CT; 
    
 quat = x(1:4);
 omega = x(5:7);
 w_rate = x(8:11);
   
 tau_w = u(1:4);
-tau_T = u(5:6);
-tau_m = u(7:12);
+tau_T = u(5:6); 
 
 %% Dynamics
 tau_rw = -Cw*tau_w;
-tau_ext = CT*tau_T + theta*CM*tau_m; % dump
+tau_ext = CT*tau_T; % dump
   
 omega_dot = inv(J)*(-cross(omega, J*omega + Cw*Jw*w_rate ) + tau_rw + tau_ext );
 

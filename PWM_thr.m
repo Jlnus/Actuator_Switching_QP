@@ -6,7 +6,7 @@ if isempty(prev_on); prev_on = zeros(2,1); end
 freq = 5;           % Hz   
 period = 1/freq;    % 주기
 amplitude   = 1.0;  % 진폭 (0~1 범위 사용)
-deadband = 0.0001;  % 미세 신호 무시
+deadband = 0.0001;  % 미세 신호 무시 0.05 * 0.01 / period
 hyst     = 0.001;
  
 % 정규화

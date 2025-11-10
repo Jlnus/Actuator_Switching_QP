@@ -115,8 +115,15 @@ for i = 1:N-1
     
     % tau(i,:) =  z(1:6)';
     tau(i,1:4) = z(1:4)'; % rw
-    tau(i,5:6) = PWM_thr(z(5:6)',t(i)); % thruster pwm
-        
+            
+    if z(5)-z(6) < 0
+        thr_switch = [0; -z(5)+z(6)];
+    else
+        thr_switch = [z(5)-z(6) ; 0];
+    end
+    
+    tau(i,5:6) = PWM_thr(thr_switch ,t(i)); % thruster pwm
+
     s1(i,:) = z(7:9)';
     s2(i,:) = z(10:12)';
 

@@ -67,6 +67,8 @@ q_e_log = zeros(N-1,4);
 omega_e_log = zeros(N-1,3);
 wheel_rate_log = zeros(N-1,4);
 eta_T_log = zeros(N-1,1); 
+filtered_u = [0 ;0];
+ts = 0.1; % time constant
 
 %% Simulation
 
@@ -76,13 +78,13 @@ for i = 1:N-1
  
     kh  = rho*kT;
 
-    % PD      
+    % ===== PD =====
     q_e = quatErr(target_quat, X(i,1:4)');
     omega_e = X(i,5:7)' - target_omega; % current - target
 
     u(i,:) = -kp*sign(q_e(1))*q_e(2:4) - kd*omega_e; % PD input  + cross(X(i,5:7)',  P.J*X(i,5:7)')
-
-    % quadprog
+    
+    % ===== quadprog =====
     % Momentum dumping
     w_e = X(i,8:11)' - target_w_rate; % wheel rate error
     u_h(i,:) = -kh * (P.Cw * (P.Jw * w_e));
@@ -115,19 +117,22 @@ for i = 1:N-1
     
     % tau(i,:) =  z(1:6)';
     tau(i,1:4) = z(1:4)'; % rw
-            
-    if z(5)-z(6) < 0
-        thr_switch = [0; -z(5)+z(6)];
-    else
-        thr_switch = [z(5)-z(6) ; 0];
-    end
-    
-    tau(i,5:6) = PWM_thr(thr_switch ,t(i)); % thruster pwm
 
+    % ===== PWM =====
+    % if z(5)-z(6) < 0 % 추력기 둘중 하나만
+    %     thr_switch = [0; -z(5)+z(6)];
+    % else
+    %     thr_switch = [z(5)-z(6) ; 0];
+    % end
+    % filtered_u = thr_switch;
+    filtered_u = filtered_u + dt/ts * (z(5:6) - filtered_u);
+    tau(i,5:6) = PWM_thr(filtered_u ,t(i)); % thruster pwm
+
+    
     s1(i,:) = z(7:9)';
     s2(i,:) = z(10:12)';
 
-    % rk4
+    % ===== rk4 =====
     [tt, X(i+1,:)] = rk4(@dynamics, X(i,:)', tau(i,:)', t(i), dt, P);
     % X(i+1,:) = X(i,:) + dt*dynamics(X(i,:)', tau(i,:)',P)';
 

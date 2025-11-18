@@ -114,21 +114,12 @@ for i = 1:N-1
     if isempty(z) || exitflag <= 0
         if i>1, z = tau(i-1,:).'; else, z = zeros(12,1); end
     end
+          
     
-    % tau(i,:) =  z(1:6)';
+    PWM_output = PWM_thr(z(5:6), t(i)); % thruster pwm
+    
     tau(i,1:4) = z(1:4)'; % rw
-
-    % ===== PWM =====
-    % if z(5)-z(6) < 0 % 추력기 둘중 하나만
-    %     thr_switch = [0; -z(5)+z(6)];
-    % else
-    %     thr_switch = [z(5)-z(6) ; 0];
-    % end
-    % filtered_u = thr_switch;
-    filtered_u = filtered_u + dt/ts * (z(5:6) - filtered_u);
-    tau(i,5:6) = PWM_thr(filtered_u ,t(i)); % thruster pwm
-
-    
+    tau(i,5:6) = PWM_output; % thr
     s1(i,:) = z(7:9)';
     s2(i,:) = z(10:12)';
 
@@ -140,7 +131,7 @@ for i = 1:N-1
         target_omega   -[  0    -target_omega(3)  target_omega(2);
         target_omega(3)  0    -target_omega(1);
         -target_omega(2)  target_omega(1)  0  ] ];
-    qd = qd + 0.5*dt*Om*qd;          % (간단 오일러; 더 정확히 하려면 RK4 적용)
+    qd = qd + 0.5*dt*Om*qd;          % 오일러
     qd = qd / norm(qd);              % 정규화
     % if qd(1) < 0, qd = -qd; end      % 부호 일관(옵션)
     target_quat = qd;                % 최신 qd(t)를 오차계산/PD/QP에 사용

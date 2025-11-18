@@ -114,10 +114,10 @@ for i = 1:N-1
     if isempty(z) || exitflag <= 0
         if i>1, z = tau(i-1,:).'; else, z = zeros(12,1); end
     end
-          
     
     PWM_output = PWM_thr(z(5:6), t(i)); % thruster pwm
-    
+    filtered_u = filtered_u + dt/ts * (PWM_output - filtered_u);
+
     tau(i,1:4) = z(1:4)'; % rw
     tau(i,5:6) = PWM_output; % thr
     s1(i,:) = z(7:9)';

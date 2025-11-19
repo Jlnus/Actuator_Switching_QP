@@ -119,7 +119,7 @@ for i = 1:N-1
     filtered_u = filtered_u + dt/ts * (PWM_output - filtered_u);
 
     tau(i,1:4) = z(1:4)'; % rw
-    tau(i,5:6) = PWM_output; % thr
+    tau(i,5:6) = filtered_u; % thr
     s1(i,:) = z(7:9)';
     s2(i,:) = z(10:12)';
 

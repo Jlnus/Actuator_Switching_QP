@@ -5,7 +5,7 @@
 clear;
 
 % Simulation Settings
-T_end = 60;                 % [s]
+T_end = 200;                 % [s]
 dt    = 0.01;               % [s]
 N     = round(T_end/dt) + 1;
 t     = (0:N-1)*dt;

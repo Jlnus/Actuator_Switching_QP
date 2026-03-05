@@ -4,29 +4,67 @@
 
 clear;
 
-% Simulation Settings
+%% Simulation Settings
 T_end = 200;                 % [s]
 dt    = 0.01;               % [s]
 N     = round(T_end/dt) + 1;
 t     = (0:N-1)*dt;
-
-% Spacecraft & Actuators
-P.J = [ 0.0775 0.0005 -0.0002; % [kg m^2]
-    -0.0005 0.1067 0.0002;
-    0.0002 -0.0002 0.0389];
-
+deg2rad = pi/180;
+%% Spacecraft & Actuators
+P.J = [1257.52 -0.07285  -0.0345; % [kg m^2]
+      -0.0728   11126.1   -24.1635;
+      -0.0345  -24.1635   11354.6];
+ 
 % RW
-P.Jw = 2.3e-5 * eye(4); % [kg m^2]
-P.Cw = [1 0 0 1/sqrt(3);
-    0 1 0 1/sqrt(3);
-    0 0 1 1/sqrt(3)];
-T_w_max = 3.2e-3; % [Nm]
-target_w_rate = 2000*[1;1;1;-sqrt(3)]*pi/30; % [rad/s]
+RW1_ROT = [0 45 0]';%ZYX [deg]
+RW2_ROT = [0 0 -45]';%ZYX [deg]
+RW3_ROT = [0 -45 0]';%ZYX [deg]
+RW4_ROT = [0 0 45]';%ZYX [deg]
+RW1_POS = [0.5 0 0]';%XYZ [m]
+RW2_POS = [0 0.5 0]';%XYZ [m]
+RW3_POS = [-0.5 0 0]';%XYZ [m]
+RW4_POS = [0 -0.5 0]';%XYZ [m]
+
+RW1_ROTM = angle2dcm(RW1_ROT(1)*deg2rad,RW1_ROT(2)*deg2rad,RW1_ROT(3)*deg2rad,'ZYX')';
+RW2_ROTM = angle2dcm(RW2_ROT(1)*deg2rad,RW2_ROT(2)*deg2rad,RW2_ROT(3)*deg2rad,'ZYX')';
+RW3_ROTM = angle2dcm(RW3_ROT(1)*deg2rad,RW3_ROT(2)*deg2rad,RW3_ROT(3)*deg2rad,'ZYX')';
+RW4_ROTM = angle2dcm(RW4_ROT(1)*deg2rad,RW4_ROT(2)*deg2rad,RW4_ROT(3)*deg2rad,'ZYX')';
+
+RW1_Axis = RW1_ROTM(:,3);
+RW2_Axis = RW2_ROTM(:,3);
+RW3_Axis = RW3_ROTM(:,3);
+RW4_Axis = RW4_ROTM(:,3);
+
+P.Jw = 0.1518 * eye(4); % [kg m^2]
+P.Cw = [RW1_Axis,RW2_Axis,RW3_Axis,RW4_Axis];
+T_w_max = 0.2; % [Nm]
+target_w_rate = 2000*[1;-1;1;-1]*pi/30; % [rad/s]
 
 % Thruster
-P.CT = [0 0; 1 -1; 0 0];
+RCS1_THR = [-1 0 0]';
+RCS2_THR = [1 0 0]';
+RCS3_THR = [0 -1 0]';
+RCS4_THR = [0 1 0]';
+RCS5_THR = [-1 0 0]';
+RCS6_THR = [1 0 0]';
+RCS7_THR = [0 -1 0]';
+RCS8_THR = [0 1 0]';
+RCS9_THR  = [-1 0 0]';
+RCS10_THR = [1 0 0]';
+RCS11_THR = [0 0 1]';
+RCS12_THR = [0 0 -1]';
+RCS13_THR = [-1 0 0]';
+RCS14_THR = [1 0 0]';
+RCS15_THR = [0 0 1]';
+RCS16_THR = [0 0 -1]';
+P.CT = [RCS1_THR,RCS2_THR,RCS3_THR,RCS4_THR, ...
+                      RCS5_THR,RCS6_THR,RCS7_THR,RCS8_THR, ...
+                      RCS9_THR,RCS10_THR,RCS11_THR,RCS12_THR, ...
+                      RCS13_THR,RCS14_THR,RCS15_THR,RCS16_THR];
+
+T_F_max = 22;  % [N]
 T_T_max = 0.05;  % [Nm]
- 
+
 % QP param
 
 rho = 1;         % rho*CT*tau_T = u_h + s2
